@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [       
+        { 
+            "name": "Start Debugging", 
+            "type": "coreclr", 
+            "request": "launch", 
+            "preLaunchTask": "AppTemplDeploy", 
+            "program": "~/.epnet/.dotnet/dotnet", 
+            "args": ["${config:workingFolder}/${workspaceFolderBasename}/${workspaceFolderBasename}.dll"], 
+            "cwd": "${config:workingFolder}/${workspaceFolderBasename}", 
+            "stopAtEntry": false, 
+            "console": "internalConsole", 
+            "pipeTransport": { 
+                "pipeCwd": "${workspaceFolder}", 
+                "pipeProgram": "ssh", 
+                "pipeArgs": [ 
+                    "${config:sshUser}@${config:sshEndpoint}" 
+                ], 
+                "debuggerPath": "~/.epnet/.vsdbg/vsdbg" 
+            } 
+        },
+        { 
+            "name": "Build", 
+            "type": "coreclr", 
+            "request": "launch", 
+            "preLaunchTask": "AppTemplBuild", 
+            "program": "dotnet",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole", 
+            "internalConsoleOptions": "neverOpen"            
+        }
+    ]
+}

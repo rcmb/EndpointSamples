@@ -1,0 +1,90 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/${workspaceFolderBasename}.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },    
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/${workspaceFolderBasename}.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "AppTemplPublish",
+            "command": "sh",
+            "type": "shell",
+            "dependsOn": "build",
+            "osx": {
+                "command": "dotnet publish -r linux-arm -o bin/linux-arm/publish --self-contained false",
+                "problemMatcher": []
+            }
+        },
+
+        {
+            "label": "AppTemplBuild",
+            "command": "sh",
+            "type": "shell",
+            "dependsOn": "build",
+            "osx": {
+                "command": "sh",
+                "args": [
+                    "/c",
+                    "\"dotnet build"
+                ],
+                "problemMatcher": []
+            }
+        },
+
+        {
+            "label": "AppTemplDeploy",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["AppTemplStop","AppTemplPublish"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "osx": {
+                "command": "ssh ${config:sshUser}@${config:sshEndpoint} mkdir -p ${config:workingFolder}/${workspaceFolderBasename};scp -r bin/linux-arm/publish/* ${config:sshUser}@${config:sshEndpoint}:${config:workingFolder}/${workspaceFolderBasename}/;ssh ${config:sshUser}@${config:sshEndpoint} chmod +x ${config:workingFolder}/${workspaceFolderBasename}/${workspaceFolderBasename};ssh ${config:sshUser}@${config:sshEndpoint} 'echo ${config:workingFolder}/${workspaceFolderBasename} > ${config:workingFolder}/startup.eca';ssh ${config:sshUser}@${config:sshEndpoint} 'echo ${config:workingFolder}/${workspaceFolderBasename}/${workspaceFolderBasename}.dll >> ${config:workingFolder}/startup.eca'; ssh ${config:sshUser}@${config:sshEndpoint} sync"
+            },
+            "problemMatcher": []
+        },
+                   
+       
+        {
+            "label": "AppTemplStop",
+            "type":"shell",            
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "osx": {
+                "command": [
+                    "ssh ${config:sshUser}@${config:sshEndpoint} 'stop_application.sh'"
+                ]
+            },
+            "problemMatcher": []
+
+        }
+    ]
+}
